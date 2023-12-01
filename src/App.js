@@ -27,12 +27,28 @@ function getMaxTotalPriceRecord() {
   return maxRecord;
 }
 
+function getMaxQuantityRecord() {
+  let max = 0;
+  let maxRecord = "None";
+  list.forEach((record) => {
+    const recordArray = record.split(",");
+    const value = parseInt(recordArray[2]);
+    if (value >= max) {
+      max = value;
+      maxRecord = record;
+    }
+  });
+  return maxRecord;
+}
+
 function main() {
   loadOrderList();
   console.log(
     "The record with the highest total price is: " + getMaxTotalPriceRecord()
   );
-  //   console.log(getMaxQuantityRecord());
+  console.log(
+    "The record with the highest quantity is: " + getMaxQuantityRecord()
+  );
   //   console.log(getMaxTotalDiscountRecord());
 }
 
