@@ -41,6 +41,20 @@ function getMaxQuantityRecord() {
   return maxRecord;
 }
 
+function getMaxTotalDiscountRecord() {
+  let max = 0;
+  let maxRecord = "None";
+  list.forEach((record) => {
+    const recordArray = record.split(",");
+    const value = (recordArray[2] * recordArray[3] * recordArray[4]) / 100;
+    if (value >= max) {
+      max = value;
+      maxRecord = record;
+    }
+  });
+  return maxRecord;
+}
+
 function main() {
   loadOrderList();
   console.log(
@@ -49,7 +63,10 @@ function main() {
   console.log(
     "The record with the highest quantity is: " + getMaxQuantityRecord()
   );
-  //   console.log(getMaxTotalDiscountRecord());
+  console.log(
+    "The record with the highest total discount is: " +
+      getMaxTotalDiscountRecord()
+  );
 }
 
 main();
