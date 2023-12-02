@@ -5,14 +5,14 @@ import { parse } from "csv-parse";
 
 type Record = {
   id: number;
-  article_name: string;
+  articleName: string;
   quantity: number;
-  unit_price: number;
-  percentage_discount: number;
+  unitPrice: number;
+  percentageDiscount: number;
   buyer: string;
 };
 
-let list: Record[] = [];
+let records: Record[] = [];
 
 function loadOrderList(): Promise<void> {
   return new Promise<void>((resolve, reject) => {
@@ -34,10 +34,10 @@ function loadOrderList(): Promise<void> {
     try {
       const headers = [
         "id",
-        "article_name",
+        "articleName",
         "quantity",
-        "unit_price",
-        "percentage_discount",
+        "unitPrice",
+        "percentageDiscount",
         "buyer",
       ];
       fs.createReadStream(argv[2], "utf8")
@@ -51,7 +51,7 @@ function loadOrderList(): Promise<void> {
               if (
                 context.column === "id" ||
                 context.column === "quantity" ||
-                context.column === "percentage_discount"
+                context.column === "percentageDiscount"
               ) {
                 return parseInt(columnValue);
               }
@@ -62,8 +62,8 @@ function loadOrderList(): Promise<void> {
             },
           })
         )
-        .on("data", (row) => {
-          list.push(row);
+        .on("data", (record: Record) => {
+          records.push(record);
         })
         .on("end", () => {
           console.log("CSV file loaded");
@@ -78,44 +78,10 @@ function loadOrderList(): Promise<void> {
   });
 }
 
-function getMaxTotalPriceRecord(): Record {
-  let max = 0;
-  let maxRecord: Record | null = null;
-  list.forEach((record) => {
-    const value = record.quantity * record.unit_price;
-    if (value >= max) {
-      max = value;
-      maxRecord = record;
-    }
-  });
-  return maxRecord || ({} as Record);
-}
-
-function getMaxQuantityRecord() {
-  let max = 0;
-  let maxRecord: Record | null = null;
-  list.forEach((record) => {
-    const value = record.quantity;
-    if (value >= max) {
-      max = value;
-      maxRecord = record;
-    }
-  });
-  return maxRecord || ({} as Record);
-}
-
-function getMaxTotalDiscountRecord() {
-  let max = 0;
-  let maxRecord: Record | null = null;
-  list.forEach((record) => {
-    const value =
-      (record.quantity * record.unit_price * record.percentage_discount) / 100;
-    if (value >= max) {
-      max = value;
-      maxRecord = record;
-    }
-  });
-  return maxRecord || ({} as Record);
+function getMaxRecord(comparator: (a: Record, b: Record) => number): Record {
+  return records.reduce((maxRecord, currentRecord) =>
+    comparator(maxRecord, currentRecord) > 0 ? maxRecord : currentRecord
+  );
 }
 
 async function main() {
@@ -123,16 +89,36 @@ async function main() {
 
   console.log(
     "The record with the highest total price is: " +
-      JSON.stringify(getMaxTotalPriceRecord(), null, 2)
+      JSON.stringify(
+        getMaxRecord(
+          (a: Record, b: Record) =>
+            a.quantity * a.unitPrice - b.quantity * b.unitPrice
+        ),
+        null,
+        2
+      )
   );
 
   console.log(
     "The record with the highest quantity is: " +
-      JSON.stringify(getMaxQuantityRecord(), null, 2)
+      JSON.stringify(
+        getMaxRecord((a: Record, b: Record) => a.quantity - b.quantity),
+        null,
+        2
+      )
   );
+
   console.log(
     "The record with the highest total discount is: " +
-      JSON.stringify(getMaxTotalDiscountRecord(), null, 2)
+      JSON.stringify(
+        getMaxRecord(
+          (a: Record, b: Record) =>
+            (a.quantity * a.unitPrice * a.percentageDiscount) / 100 -
+            (b.quantity * b.unitPrice * b.percentageDiscount) / 100
+        ),
+        null,
+        2
+      )
   );
 }
 
