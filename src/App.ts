@@ -1,5 +1,6 @@
 import { argv } from "node:process";
 import * as fs from "fs";
+import * as path from "path";
 import { parse } from "csv-parse";
 
 type Record = {
@@ -15,6 +16,21 @@ let list: Record[] = [];
 
 function loadOrderList(): Promise<void> {
   return new Promise<void>((resolve, reject) => {
+    const filePath = argv[2];
+
+    if (!filePath) {
+      reject(new Error("Too few arguments"));
+    }
+
+    if (path.extname(filePath) !== ".csv") {
+      reject(
+        new Error(
+          "Invalid type of file: needed .csv but provided " +
+            path.extname(filePath)
+        )
+      );
+    }
+
     try {
       const headers = [
         "id",
