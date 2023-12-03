@@ -3,21 +3,15 @@ import * as fs from "fs";
 import * as path from "path";
 import { parse } from "csv-parse";
 
-type Record = {
-  id: number;
-  articleName: string;
-  quantity: number;
-  unitPrice: number;
-  percentageDiscount: number;
-  buyer: string;
-};
+import { Record } from "../interfaces/Record";
 
-let records: Record[] = [];
-
-function loadOrderList(): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    const filePath = argv[2];
-
+/**
+ * Load a .csv file from the path given as parameter and return the content as a `Promise` of `Record` array. If `filePath` is not provided or if the file extension is not .csv an error is thrown.
+ * @param filePath the path of the .csv file.
+ * @returns a `Promise` of `Record` array representing the .csv content.
+ */
+function loadOrderList(filePath: string): Promise<Record[]> {
+  return new Promise<Record[]>((resolve, reject) => {
     if (!filePath) {
       reject(new Error("Too few arguments"));
     }
@@ -32,6 +26,7 @@ function loadOrderList(): Promise<void> {
     }
 
     try {
+      let records: Record[] = [];
       const headers = [
         "id",
         "articleName",
@@ -67,7 +62,7 @@ function loadOrderList(): Promise<void> {
         })
         .on("end", () => {
           console.log("CSV file loaded");
-          resolve();
+          resolve(records);
         })
         .on("error", (err) => {
           reject(err);
@@ -78,48 +73,62 @@ function loadOrderList(): Promise<void> {
   });
 }
 
-function getMaxRecord(comparator: (a: Record, b: Record) => number): Record {
+/**
+ * Iterate the `Record` array given as parameter and calls the specified comparator function for all the records in the array. The return value is the `Record` with the maximum value evaluated from the comparator.
+ * @param records the `Record` array.
+ * @param comparator the callback function to compare the records.
+ * @returns the `Record` with the maximum value evaluated by the given comparator function.
+ */
+function getMaxRecord(
+  records: Record[],
+  comparator: (a: Record, b: Record) => number
+): Record {
   return records.reduce((maxRecord, currentRecord) =>
     comparator(maxRecord, currentRecord) > 0 ? maxRecord : currentRecord
   );
 }
 
 async function main() {
-  await loadOrderList();
+  loadOrderList(argv[2]).then((records) => {
+    console.log(
+      "The record with the highest total price is: " +
+        JSON.stringify(
+          getMaxRecord(
+            records,
+            (a: Record, b: Record) =>
+              a.quantity * a.unitPrice - b.quantity * b.unitPrice
+          ),
+          null,
+          2
+        )
+    );
 
-  console.log(
-    "The record with the highest total price is: " +
-      JSON.stringify(
-        getMaxRecord(
-          (a: Record, b: Record) =>
-            a.quantity * a.unitPrice - b.quantity * b.unitPrice
-        ),
-        null,
-        2
-      )
-  );
+    console.log(
+      "The record with the highest quantity is: " +
+        JSON.stringify(
+          getMaxRecord(
+            records,
+            (a: Record, b: Record) => a.quantity - b.quantity
+          ),
+          null,
+          2
+        )
+    );
 
-  console.log(
-    "The record with the highest quantity is: " +
-      JSON.stringify(
-        getMaxRecord((a: Record, b: Record) => a.quantity - b.quantity),
-        null,
-        2
-      )
-  );
-
-  console.log(
-    "The record with the highest total discount is: " +
-      JSON.stringify(
-        getMaxRecord(
-          (a: Record, b: Record) =>
-            (a.quantity * a.unitPrice * a.percentageDiscount) / 100 -
-            (b.quantity * b.unitPrice * b.percentageDiscount) / 100
-        ),
-        null,
-        2
-      )
-  );
+    console.log(
+      "The record with the highest total discount is: " +
+        JSON.stringify(
+          getMaxRecord(
+            records,
+            (a: Record, b: Record) =>
+              (a.quantity * a.unitPrice * a.percentageDiscount) / 100 -
+              (b.quantity * b.unitPrice * b.percentageDiscount) / 100
+          ),
+          null,
+          2
+        )
+    );
+  });
 }
 
 main();
