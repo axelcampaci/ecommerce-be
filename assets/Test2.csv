@@ -1,0 +1,11 @@
+Id,Article Name,Quantity,Unit price,Percentage discount,Buyer
+1,Coke,10,1,0,Mario Rossi
+2,Coke,15,2,0,Luca Neri
+3,Fanta,5,3,2,Luca Neri
+4,Water,20,1,10,Mario Rossi
+5,Fanta,1,4,15,Andrea Bianchi
+6,Sprite,25,2.5,20,Paolo Verdi
+7,Fanta,2,5,5,Mario Rossi
+8,Water,6,1,80,Andrea Bianchi
+9,Coke,30,3.5,90,Paolo Verdi
+10,Sprite,1,50,50,Andrea Bianchi
