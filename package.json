@@ -2,9 +2,9 @@
   "name": "ecommerce-be",
   "version": "1.0.0",
   "description": "Exercise project for reading from an order list and display some info about it.",
-  "main": "out/App.js",
+  "main": "out/src/App.js",
   "scripts": {
-    "start": "npm run build && node out/App.js assets/List.csv",
+    "start": "npm run build && node out/src/App.js assets/List.csv",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
