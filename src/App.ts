@@ -61,7 +61,12 @@ function loadOrderList(filePath: string): Promise<Record[]> {
           records.push(record);
         })
         .on("end", () => {
-          console.log("CSV file loaded");
+          console.log("File successfully loaded");
+          if (records.length === 0) {
+            console.warn(
+              "Warning: The file loaded is valid but has no record stored"
+            );
+          }
           resolve(records);
         })
         .on("error", (err) => {
@@ -90,44 +95,44 @@ function getMaxRecord(
 
 async function main() {
   loadOrderList(argv[2]).then((records) => {
-    console.log(
-      "The record with the highest total price is: " +
-        JSON.stringify(
-          getMaxRecord(
-            records,
-            (a: Record, b: Record) =>
-              a.quantity * a.unitPrice - b.quantity * b.unitPrice
-          ),
-          null,
-          2
-        )
-    );
+    if (records.length > 0) {
+      let record = getMaxRecord(
+        records,
+        (a: Record, b: Record) =>
+          a.quantity * a.unitPrice - b.quantity * b.unitPrice
+      );
+      console.log(
+        "The record with the highest total price [value = " +
+          record.quantity * record.unitPrice +
+          "] is: " +
+          JSON.stringify(record, null, 2)
+      );
 
-    console.log(
-      "The record with the highest quantity is: " +
-        JSON.stringify(
-          getMaxRecord(
-            records,
-            (a: Record, b: Record) => a.quantity - b.quantity
-          ),
-          null,
-          2
-        )
-    );
+      record = getMaxRecord(
+        records,
+        (a: Record, b: Record) => a.quantity - b.quantity
+      );
+      console.log(
+        "The record with the highest quantity [value = " +
+          record.quantity +
+          "] is: " +
+          JSON.stringify(record, null, 2)
+      );
 
-    console.log(
-      "The record with the highest total discount is: " +
-        JSON.stringify(
-          getMaxRecord(
-            records,
-            (a: Record, b: Record) =>
-              (a.quantity * a.unitPrice * a.percentageDiscount) / 100 -
-              (b.quantity * b.unitPrice * b.percentageDiscount) / 100
-          ),
-          null,
-          2
-        )
-    );
+      record = getMaxRecord(
+        records,
+        (a: Record, b: Record) =>
+          (a.quantity * a.unitPrice * a.percentageDiscount) / 100 -
+          (b.quantity * b.unitPrice * b.percentageDiscount) / 100
+      );
+      console.log(
+        "The record with the highest total discount [value = " +
+          (record.quantity * record.unitPrice * record.percentageDiscount) /
+            100 +
+          "] is: " +
+          JSON.stringify(record, null, 2)
+      );
+    }
   });
 }
 
