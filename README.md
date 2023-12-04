@@ -34,6 +34,7 @@ To just build the project:
 ```
 npm run build
 ```
+> The src code will be compiled into `out` folder.
 
 To run the project with custom arguments:
 ```
